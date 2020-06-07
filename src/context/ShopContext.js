@@ -5,6 +5,6 @@ export const ShopContext = createContext({
     getInventory: () => {},
     selectedItem: {},
     selectItem: () => {},
-    retrievedItem: {},
-    setRetrievedItem: () => {},
+    user: [],
+    getUser: () => {},
 });
