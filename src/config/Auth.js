@@ -12,6 +12,8 @@ export const logout = () => {
     localStorage.removeItem('auth');
     localStorage.removeItem('admin');
     localStorage.removeItem('user');
+    localStorage.removeItem('cart');
+    localStorage.removeItem('wishlist');
     window.location.reload(false);
 };
 
@@ -24,5 +26,5 @@ export const setAdmin = (admin) => {
 };
 
 export const setUser = (user) => {
-    localStorage.setItem('user', user);
+    localStorage.setItem('user', JSON.stringify({ user }));
 };
