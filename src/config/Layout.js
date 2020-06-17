@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Redirect, Link } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import clsx from 'clsx';
-import { useTheme } from '@material-ui/core/styles';
+import { useTheme, getContrastRatio } from '@material-ui/core/styles';
 import { layoutStyle } from '../styles/layout';
 import { SignIn } from '../components/SignIn';
 import { logout, adminLoggedIn } from './Auth';
@@ -12,6 +12,7 @@ import Divider from '@material-ui/core/Divider';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuSharpIcon from '@material-ui/icons/MenuSharp';
+import Badge from '@material-ui/core/Badge';
 import ShoppingCartSharpIcon from '@material-ui/icons/ShoppingCartSharp';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -22,12 +23,18 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 export const Layout = ({ children }) => {
     const classes = layoutStyle();
     const theme = useTheme();
-    const { user, getUser } = useContext(ShopContext)
+    const { user, getUser } = useContext(ShopContext);
+    const [cart, setCart] = useState([]);
     const [open, setOpen] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
 
-    // console.log("user inside Layout.js", user);
+    const getCart = () => {
+        if (localStorage.getItem('cart')) {
+            const cart = JSON.parse(localStorage.getItem('cart')).cartItems;
+            setCart(cart);
+        };
+    };
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -62,9 +69,6 @@ export const Layout = ({ children }) => {
                         Log Out
                         {logout}
                     </Button>
-                    {/* <Route exact path="/">
-                        {!loggedIn ? <Redirect to="/" /> : '' }
-                    </Route> */}
                 </>
             );
         };
@@ -74,14 +78,6 @@ export const Layout = ({ children }) => {
             setIsAdmin(false);
         };
     };
-
-    // const adminCheck = () => {
-    //     if (localStorage.getItem('admin') === 'admin') {
-    //         setIsAdmin(true);
-    //     } else {
-    //         setIsAdmin(false);
-    //     };
-    // };
 
     const showCart = () => {
         if (isAdmin) {
@@ -93,7 +89,9 @@ export const Layout = ({ children }) => {
             return (
                 <Link to='/cart' className={classes.link}>
                     <IconButton className={classes.cartButton} edge="end" style={{ paddingLeft: '30px' }}>
-                        <ShoppingCartSharpIcon className={classes.shoppingCartIcon} style={{ fontSize: '35', color: '#fff' }} />
+                        <Badge badgeContent={cart.length} max={10} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} color="secondary">
+                            <ShoppingCartSharpIcon className={classes.shoppingCartIcon} style={{ fontSize: '35', color: '#fff' }} />
+                        </Badge>
                     </IconButton>
                 </Link>
             );
@@ -129,7 +127,7 @@ export const Layout = ({ children }) => {
         if (loggedIn && !isAdmin) {
             return (
                 <div className={classes.profileOptions} style={{ paddingBottom: '50px', width: '100%' }}>
-                    <Link to='/account' className={classes.link}>
+                    <Link to='/profile' className={classes.link}>
                         <AccountCircleIcon style={{ fontSize: '40', color: 'black' }} />
                         <Button className={classes.profileButton}style={{ fontSize: '30px', color: 'black', fontWeight: '450', textTransform: 'none'}}>
                             {user.firstName}
@@ -150,28 +148,7 @@ export const Layout = ({ children }) => {
         };
     };
 
-    useEffect(() => {loggedInCheck()}, []);
-
-    // useEffect(() => {if (loggedIn) adminCheck()}, []);
-
-    // useEffect(() => {getUser()}, []);
-
-    // const isAdmin = () => {
-    //     if (localStorage.getItem('admin') === 'admin') {
-    //         return (
-    //             <>
-    //             </>
-    //         );
-    //     } else {
-    //         return (
-    //             <Link to='cart' className={classes.link}>
-    //                 <IconButton className={classes.cartButton}>
-    //                     <ShoppingCartIcon className={classes.shoppingCartIcon} style={{ fontSize: '35', color: '#fff' }} />
-    //                 </IconButton>
-    //             </Link>
-    //         );
-    //     };
-    // };
+    useEffect(() => {loggedInCheck(); getCart(); showCart()}, []);
 
     return (
         <div className={classes.root}>
@@ -201,10 +178,6 @@ export const Layout = ({ children }) => {
                         <div className={classes.cartButtonContainer}>
                             {showCart()}
                     </div>
-                    {/* {isAdmin()} */}
-                    {/* <Typography variant="h6" noWrap>
-                        Kmart (do the bankrupt retain trademarks?)
-                    </Typography> */}
                 </Toolbar>
             </AppBar>
             <Drawer 
@@ -238,30 +211,8 @@ export const Layout = ({ children }) => {
                         {showProfileOptions()}
                         {showAdminOptions()}
                         {accountAccess()}
-                        {/* <SignIn />
-                        <Button className={classes.logoutButton} color="primary">
-                            Log Out
-                            {logout}
-                        </Button> */}
                     </div>
                 </div>
-
-
-
-
-                {/* <div className="drawerListLinks">
-                    <Link to='/calendar' style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <Button className="calendarButton" variant="contained" color="primary">
-                            Calendar
-                        </Button>
-                    </Link>
-                    {displayLists}
-                    <Link to='/completed' style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <Button className="calendarButton" variant="contained" color="primary">
-                            Completed
-                        </Button>
-                    </Link>
-                </div> */}
             </Drawer>
             <main className={classes.content}>
                 {children}
