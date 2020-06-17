@@ -15,6 +15,7 @@ import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import MenuSharpIcon from '@material-ui/icons/MenuSharp';
+import Badge from '@material-ui/core/Badge';
 import ShoppingCartSharpIcon from '@material-ui/icons/ShoppingCartSharp';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -24,10 +25,18 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 export const HomeLayout = ({ children }) => {
     const classes = homeLayoutStyle();
     const theme = useTheme();
-    const { user, getUser } = useContext(ShopContext)
+    const { user, getUser } = useContext(ShopContext);
+    const [cart, setCart] = useState([]);
     const [open, setOpen] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+
+    const getCart = () => {
+        if (localStorage.getItem('cart')) {
+            const cart = JSON.parse(localStorage.getItem('cart')).cartItems;
+            setCart(cart);
+        };
+    };
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -62,21 +71,10 @@ export const HomeLayout = ({ children }) => {
                         Log Out
                         {logout}
                     </Button>
-                    {/* <Route exact path="/">
-                        {!loggedIn ? <Redirect to="/" /> : '' }
-                    </Route> */}
                 </>
             );
         };
     };
-
-    // const adminCheck = () => {
-    //     if (localStorage.getItem('admin') === 'admin') {
-    //         setIsAdmin(true);
-    //     } else {
-    //         setIsAdmin(false);
-    //     };
-    // };
 
     const showCart = () => {
         if (isAdmin) {
@@ -88,7 +86,9 @@ export const HomeLayout = ({ children }) => {
             return (
                 <Link to='cart' className={classes.link}>
                     <IconButton className={classes.cartButton} edge="end" style={{ paddingLeft: '30px' }}>
-                        <ShoppingCartSharpIcon className={classes.shoppingCartIcon} style={{ fontSize: '35', color: 'black' }} />
+                        <Badge badgeContent={cart.length} max={10} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} color="secondary">
+                            <ShoppingCartSharpIcon className={classes.shoppingCartIcon} style={{ fontSize: '35', color: 'black' }} />
+                        </Badge>
                     </IconButton>
                 </Link>
             );
@@ -124,7 +124,7 @@ export const HomeLayout = ({ children }) => {
         if (loggedIn && !isAdmin) {
             return (
                 <div className={classes.adminOptions} style={{ paddingBottom: '50px', width: '100%' }}>
-                    <Link to='/account' className={classes.link}>
+                    <Link to='/profile' className={classes.link}>
                         <AccountCircleIcon style={{ fontSize: '40', color: 'black' }} />
                         <Button className={classes.profileButton} style={{ fontSize: '30px', color: 'black', fontWeight: '450', textTransform: 'none'}}>
                             {user.firstName}
@@ -145,11 +145,7 @@ export const HomeLayout = ({ children }) => {
         };
     };
 
-    useEffect(() => {loggedInCheck()}, []);
-
-    // useEffect(() => {if (loggedIn) adminCheck()}, []);
-
-    // useEffect(() => {adminCheck()}, []);
+    useEffect(() => {loggedInCheck(); getCart(); showCart()}, []);
 
     return (
         <div className={classes.root}>
@@ -163,7 +159,6 @@ export const HomeLayout = ({ children }) => {
                 >
                     <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <IconButton 
-                            // color="inherit"
                             aria-label="open drawer" 
                             onClick={handleDrawerOpen}
                             edge="start" 
@@ -205,11 +200,6 @@ export const HomeLayout = ({ children }) => {
                             {showProfileOptions()}
                             {showAdminOptions()}
                             {accountAccess()}
-                            {/* <SignIn /> */}
-                            {/* <Button className={classes.logoutButton} color="primary">
-                                Log Out
-                                {logout}
-                            </Button> */}
                         </div>
                     </div>
                 </Drawer>
